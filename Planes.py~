@@ -23,13 +23,12 @@ class Plane(Turtle):
 		self.goto(x,y)
 
 
+m = Plane(250,250,"1",False,"v")
+b = Plane(150,150,"2",False,"h")
+l = Plane(350,350,"3",False,"v")
+p = Plane(50,50,"1",False,"h")
 
-#m = Plane(250,250,"1",False,"v")
-#b = Plane(150,150,"2",False,"h")
-#l = Plane(350,350,"3",False,"v")
-#p = Plane(50,50,"1",False,"h")
-
-#turtle.mainloop()
+turtle.mainloop()
 
 
 

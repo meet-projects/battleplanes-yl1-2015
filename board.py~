@@ -4,7 +4,6 @@ import Planes
 from Planes import *
 import Markers
 from Markers import *
-
 turtle.ht()
 
 class Board(Turtle):

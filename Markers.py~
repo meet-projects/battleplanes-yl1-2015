@@ -15,11 +15,13 @@ class Marker(Turtle):
 		self.colour=colour
 		self.hit=hit
 		self.pu()
+		self.goto(x,y)
+
 
 		if hit==True:  
 			self.shape("marker.gif")
 		else:
 			self.shape("blue.gif")
-		self.goto(x,y)
+
 
 #m = Marker(50,50,"red",True)

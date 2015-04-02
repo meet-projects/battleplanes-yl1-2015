@@ -1,16 +1,10 @@
-import turtle
-from turtle import *
 import Planes
 from Planes import *
 import Markers
 from Markers import *
 
-turtle.ht()
-
-class Board(Turtle):
+class Board():
 	def __init__(self):
-		cv = turtle.getscreen()
-		RawTurtle.__init__(self,cv)
 		self.planes = []
 		self.markers = []
 	def AddPlane(self,plane):

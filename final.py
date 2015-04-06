@@ -51,9 +51,10 @@ buildboard(-400,200)
 boardpl1 = Board()
 boardpl2 = Board()
 
-PLAYER_TURN = 0
+PLAYER_TURN = 1
 START = True
 SWITCH_TEXT = "START"
+fHitMarkerThisTurn = False
 
 turtle.pu()
 turtle.goto(-75,300)
@@ -65,6 +66,8 @@ turtle.goto(-75,300)
 turtle.pu()
 turtle.goto(0,250)
 turtle.write("START", False,"center",font=("Ariel",25,"normal"))
+turtle.goto(0,350)
+turtle.write("PLAYER " + str(PLAYER_TURN), False, "center", font=("Ariel",25,"normal"))
 
 allplanes = [];
 def DrawFirstPlanes():
@@ -72,11 +75,9 @@ def DrawFirstPlanes():
 	allplanes = []
 	for x in range(0,3):
 		m1 = Plane(-300 + x * 100, -300,str(x % 3 + 1),False,"v")
-		m1.ondrag(m1.goto)
-		m1.onrelease(m1.released)
+		m1.onclick(m1.clicked)
 		m2 = Plane(0 + x*150,-300,str(x % 3 + 1),False,"h")
-		m2.ondrag(m2.goto)
-		m2.onrelease(m2.released)
+		m2.onclick(m2.clicked)
 		allplanes = allplanes + [m1, m2]
 
 def startbutton():
@@ -86,15 +87,14 @@ def startbutton():
 	global START
 	global boardpl2
 	global boardpl1
+	global fHitMarkerThisTurn
 	if (SWITCH_TEXT == "START" and START == True):
 		DrawFirstPlanes()
 		SWITCH_TEXT = "END"
-		PLAYER_TURN += 1
 	elif (SWITCH_TEXT == "END" and START == True):
 		ourboard = Board()
 		for x in allplanes:
-			x.ondrag(x.passfunc)
-			x.onrelease(x.passfunc)
+			x.onclick(x.passfunc)
 			if (x.loc != ""):
 				ourboard.AddPlane(x)
 			else:
@@ -103,8 +103,10 @@ def startbutton():
 		if PLAYER_TURN == 2:
 			boardpl2 = ourboard
 			START = False
+			PLAYER_TURN = 1
 		else:
 			boardpl1 = ourboard
+			PLAYER_TURN = 2
 		SWITCH_TEXT = "START"
 	elif (SWITCH_TEXT == "START" and START == False):
 		ourboard = []
@@ -124,30 +126,73 @@ def startbutton():
 			PLAYER_TURN = 2
 		ourboard.HideAll()
 		SWITCH_TEXT = "START"
+		fHitMarkerThisTurn = False
 	turtle.pensize(45)
 	turtle.pu()
 	turtle.goto(50,275)
 	turtle.pd()
 	turtle.pencolor("white")
 	turtle.goto(-50,275)
+	turtle.pu()
+	turtle.goto(-75,375)
+	turtle.pd()
+	turtle.goto(75,375)
 	turtle.pensize(1)
 	turtle.pencolor("black")
 	turtle.pu()
 	turtle.goto(0,250)
 	turtle.write(SWITCH_TEXT, False,"center",font=("Ariel",25,"normal"))
+	turtle.goto(0, 350)
+	turtle.write("PLAYER " + str(PLAYER_TURN), False, "center", font=("Ariel",25,"normal"))
 
 def ScreenClicked(x,y):
 	global START
+	global PLAYER_TURN
+	global boardpl1
+	global boardpl2
+	global fHitMarkerThisTurn
+	global SWITCH_TEXT
 	if (x > -75 and x < 75 and y > 250 and y <300):
 		startbutton()
 	if (x < 0 or x > 400 or y > 200 or y < -200):
 		pass
 	elif (START == True):
 		pass
-	else:
+	elif (fHitMarkerThisTurn == False and SWITCH_TEXT == "END"):
 		col = int(x / 50)
-		row = int(y / 50)
-		m = Marker(25 + col*50, 200+row*50,"red",True)
+		row = int((y + 200) / 50)
+		# check if the other person's board..
+		curboard = []
+		otherboard = []
+		if (PLAYER_TURN == 1):
+			curboard = boardpl1
+			otherboard = boardpl2
+		else:
+			curboard = boardpl2
+			otherboard = boardpl1
+		
+		if (curboard.MarkerExistsAtLoc(25 + col*50, - 175 + row*50)):
+			return
+		
+		color = "blue"
+		hit = False;
+		
+		if (otherboard.PlaneExistsAtLoc(-25 - col*50, - 175 + row*50)):
+			color = "red"
+			hit = True
+		
+		m = Marker(25 + col*50, - 175 + row*50,color,hit,True)
+		m2 = Marker(-25 - col*50, - 175 + row*50,color,hit,False)
+		
+		curboard.AddMarker(m)
+		otherboard.AddMarker(m2)
+		
+		sunkPlane = otherboard.CheckIfPlaneSunk(-25 - col*50, - 175 + row*50)
+		if (sunkPlane != None):
+			newPlane = Plane(-sunkPlane.x, sunkPlane.y, str(sunkPlane.size), sunkPlane.sunk, sunkPlane.tilt)
+			curboard.AddPlane(newPlane)
+			
+		fHitMarkerThisTurn = True
 
 turtle.onscreenclick(ScreenClicked)
 
